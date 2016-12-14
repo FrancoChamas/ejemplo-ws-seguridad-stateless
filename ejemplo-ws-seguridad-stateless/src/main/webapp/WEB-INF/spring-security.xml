@@ -1,0 +1,75 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+      http://www.springframework.org/schema/security
+      http://www.springframework.org/schema/security/spring-security-4.0.xsd
+      http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<!-- importar el archivo de contexto de la librería de seguridad -->
+	<beans:import
+		resource="classpath:AccesoSeguridadStatelessApplicationContext.xml" />
+
+	<!-- excluimos de seguridad el método que obtiene el tocken -->
+	<http pattern="/tocken/**" security="none" />
+
+	<sec:http auto-config="false" use-expressions="true"
+		entry-point-ref="accesoAuthenticationProcessingEntryPoint"
+		create-session="stateless">
+
+		<!-- csrf disable ver si se implementa -->
+
+		<sec:custom-filter ref="accesoStatelessAuthenticationFilter"
+			position="FORM_LOGIN_FILTER" />
+
+<!-- 		<sec:access-denied-handler ref="authenticationAccessDeniedHandler" /> -->
+
+		<sec:intercept-url pattern="/noticiaAdmin/**"
+			access="hasRole('ROLE_ADMIN')" />
+		<sec:intercept-url pattern="/noticiaAsistente/**"
+			access="hasRole('ROLE_ADMIN') or hasRole('ROLE_ASISTENTE')" />
+		<sec:intercept-url pattern="/noticiaConductor/**"
+			access="hasRole('ROLE_CONDUCTOR')" />
+	</sec:http>
+
+	<sec:authentication-manager alias="authenticationManager">
+	</sec:authentication-manager>
+
+
+	<!-- ver si se mantiene el ya que no funcionanl los interceptores por anotacion 
+		para la autorizacion -->
+	<sec:global-method-security
+		secured-annotations="enabled" />
+
+<!-- 	<beans:bean id="authenticationAccessDeniedHandler" -->
+<!-- 		class="com.fac.seguridad.api.rest.tocken.accesoseguridadstateless.handler.DefaultAuthenticationAccessDeniedHandler" /> -->
+
+<!-- 	<beans:bean id="authenticationAccessSuccessHandler" -->
+<!-- 		class="com.fac.seguridad.api.rest.tocken.accesoseguridadstateless.handler.DefaultAuthenticationAccessSuccessHandler" /> -->
+
+<!-- 	<beans:bean id="accesoAuthenticationProcessingEntryPoint" -->
+<!-- 		class="com.fac.seguridad.api.rest.tocken.accesoseguridadstateless.entrypoint.AccesoAuthenticationProcessingEntryPoint" /> -->
+
+<!-- 	<beans:bean id="accesoStatelessAuthenticationFilter" -->
+<!-- 		class="com.fac.seguridad.api.rest.tocken.accesoseguridadstateless.filter.AccesoStatelessAuthenticationFilter"> -->
+<!-- 	</beans:bean> -->
+
+	<beans:bean id="accesoCreateTokenService"
+		class="com.fac.seguridad.api.rest.tocken.accesoseguridadstateless.services.AccesoCreateTokenServiceImp">
+		<beans:property name="idAplicacion" value="123" />
+	</beans:bean>
+
+	<beans:bean id="accesoAuditoriaService"
+		class="com.fac.seguridad.api.rest.tocken.accesoseguridadstateless.services.DefaultAccesoAuditoriaServiceImpl">
+	</beans:bean>
+
+	<beans:bean id="accesoAutenticacionService"
+		class="com.fac.seguridad.api.rest.tocken.accesoseguridadstateless.services.DefaultAccesoAutenticacionServiceImpl">
+	</beans:bean>
+
+	<beans:bean id="accesoAutorizadorService"
+		class="com.fac.seguridad.api.rest.tocken.accesoseguridadstateless.services.DefaultAccesoAutorizadorServiceImpl">
+	</beans:bean>
+
+</beans:beans>
